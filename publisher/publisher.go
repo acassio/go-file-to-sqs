@@ -1,6 +1,7 @@
 package publisher
 
 import (
+	"sync/atomic"
 	"sync"
 	"bufio"
 	"os"
@@ -20,7 +21,18 @@ type Publisher struct {
 	queueUrl string
 	filename string
 	reprocess []string
+	totalMessages, totalSuccess,totalFailure count32
 	sync.Mutex
+}
+
+type count32 int32
+
+func (c *count32) inc(num int32) int32 {
+    return atomic.AddInt32((*int32)(c), num)
+}
+
+func (c *count32) get() int32 {
+    return atomic.LoadInt32((*int32)(c))
 }
 
 // NewPublisher returns a new publisher to process files containing sqs messages
@@ -82,32 +94,42 @@ func (s *Publisher) Run()error{
 			if len(message)==0{
 				break
 			}
+			s.totalMessages++
 			chunk = append(chunk,message)
 			if len(chunk)==10{
 				wg.Add(1)
-				go s.SendMessages(chunk,&wg)			
+				go s.SendMessages(chunk,&wg,false)			
 				chunk = []string{}
 			}
 			continue
 		}
 		if len(chunk)>0{
 			wg.Add(1)
-			go s.SendMessages(chunk,&wg)		
+			go s.SendMessages(chunk,&wg,false)		
 		}
 		break
 	}
 	wg.Wait()
 
 	if len(s.reprocess)>0{
-		log.Printf("%d message(s) will be reprocessed: %+v\n",len(s.reprocess),s.reprocess)
-		for _,v := range chunkMessages(10,s.reprocess){
+		dataReprocess := s.reprocess
+		s.reprocess = []string{}
+		log.Printf("%d message(s) will be reprocessed:\n",len(dataReprocess))
+		to := 0
+		for _,v := range chunkMessages(10,dataReprocess){
+			to += len(v)
 			wg.Add(1)
-			go s.SendMessages(v,&wg)
+			go s.SendMessages(v,&wg,true)
 		}
+
 	}
 	wg.Wait()
 
-	log.Println("Processing finished!")
+	if len(s.reprocess)>0{
+		log.Printf("The following %d message(s) could not be sent: %+v\n",len(s.reprocess),s.reprocess)
+	}
+
+	log.Printf("TOTAL MESSAGES: %d\nTOTAL SUCCESS: %d\nTOTAL FAILURE: %d",s.totalMessages,s.totalSuccess,s.totalFailure)
 
 	return nil
 }
@@ -128,7 +150,7 @@ func chunkMessages(chunkSize int,messages []string)[][]string{
 
 
 //SendMessages Delivers up to ten messages to the specified queue
-func (s *Publisher) SendMessages(messages []string,wg *sync.WaitGroup)(*sqs.SendMessageBatchOutput,error){
+func (s *Publisher) SendMessages(messages []string,wg *sync.WaitGroup,reprocess bool)(*sqs.SendMessageBatchOutput,error){
 
 	defer wg.Done()
 	entries := []*sqs.SendMessageBatchRequestEntry{}
@@ -142,12 +164,18 @@ func (s *Publisher) SendMessages(messages []string,wg *sync.WaitGroup)(*sqs.Send
 		QueueUrl:aws.String(s.queueUrl),
 		Entries : entries,
 	})
-
 	
 	if err!=nil{
+		s.Lock()
 		s.reprocess = append(s.reprocess,messages...)
+		s.Unlock()
+		if reprocess{
+			s.totalFailure.inc(int32(len(messages)))
+		}
 		return nil,err
 	}
+
+	s.totalSuccess.inc(int32(len(messages)))
 
 	return output,nil
 }	

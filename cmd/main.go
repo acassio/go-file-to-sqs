@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/acassio/go-sqs-publisher/publisher"
-	"fmt"
 )
 
 func main()  {
@@ -12,8 +11,6 @@ func main()  {
 	if err!=nil{
 		panic(err)
 	}
-	fmt.Println("messages sent!")
-
 }
 
 

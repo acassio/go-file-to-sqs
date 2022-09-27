@@ -10,7 +10,7 @@ AWS credentials properly configured and with permission to receive messages to t
 ```go install github.com/acassio/go-tools/sqstofile@latest```
 
 ### Usage:
-```go-sqstofile -file my-text-file.txt -queue my-sqs-queue-url```
+```sqstofile -file my-text-file.txt -queue my-sqs-queue-url```
 
 |parameter|type|required|default|description
 |---------|----|--------|-------------|----------

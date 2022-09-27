@@ -11,7 +11,7 @@ AWS credentials properly configured and with permission to send messages to the 
 ```go install github.com/acassio/go-tools/filetosqs@latest```
 
 ### Usage:
-```go-filetosqs -file my-text-file.txt -queue my-sqs-queue-url```
+```filetosqs -file my-text-file.txt -queue my-sqs-queue-url```
 
 |parameter|type|required|default|description
 |---------|----|--------|-------------|----------

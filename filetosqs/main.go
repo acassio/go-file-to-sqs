@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 	"log"
-	"github.comm/acassio/go-tools/filetosqs/service"
+	"github.com/acassio/go-tools/filetosqs/service"
 )
 
 func main()  {

@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 	"log"
-	"github.com/acassio/go-file-to-sqs/publisher"
+	"github.comm/acassio/go-tools/filetosqs/service"
 )
 
 func main()  {
@@ -13,7 +13,7 @@ func main()  {
 		elapsed := time.Since(start)
 		log.Printf("Time Elapsed: %v s\n",elapsed.Seconds())
 	}()
-	svc := publisher.NewPublisher()
+	svc := service.NewPublisher()
 	err := svc.Run()
 	if err!=nil{
 		panic(err)

@@ -1,4 +1,4 @@
-module github.com/acassio/go-file-to-sqs
+module github.com/acassio/go-tools
 
 go 1.18
 

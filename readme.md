@@ -1,20 +1,12 @@
-## Go File to SQS
+## Go Tools
 
-It`s a simple command line to automate the process of sending batch messages from a file to an SQS queue.
-Each message within the file must be separated by line breaks.
+It`s a collection of commands to help developers being more productive in day-to-day basis.
 
 
-### Requirements:
-AWS credentials properly configured and with permission to send messages to the specified queue.
+### filetosqs
+#### Send messages from a File to a SQS Queue
+See more [here](https://github.com/acassio/go-tools/filetosqs/blob/master/readme.md) 
 
-### Installation:
-```go install github.com/acassio/go-file-to-sqs/go-filetosqs```
-
-### Usage:
-```go-filetosqs -file my-text-file.txt -queue my-sqs-queue-url```
-
-|parameter|type|required|default|description
-|---------|----|--------|-------------|----------
-|file|string|yes||file that contains the messages. |
-|queue|string|yes||URL of the queue to which messages will be sent.  |
-|raw-content|boolean|no|false|Describe whether messages within the file should be read as raw content as opposed to format: {"Id":"...","MessageBody":"..."}.|
+### sqstofile
+####  Receive messages from a SQS Queue and save on specified file
+See more [here](https://github.com/acassio/go-tools/sqstofile/blob/master/readme.md) 

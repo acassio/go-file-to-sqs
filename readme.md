@@ -17,4 +17,4 @@ AWS credentials properly configured and with permission to send messages to the 
 |---------|----|--------|-------------|----------
 |file|string|yes||file that contains the messages. |
 |queue|string|yes||URL of the queue to which messages will be sent.  |
-|raw-content|boolean|no|false|Describe whether messages within the file should be read as raw content as opposed to format: {"Id":"...","MessageBody":"{...}"}.|
+|raw-content|boolean|no|false|Describe whether messages within the file should be read as raw content as opposed to format: {"Id":"...","MessageBody":"..."}.|

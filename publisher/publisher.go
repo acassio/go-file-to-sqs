@@ -1,14 +1,15 @@
 package publisher
 
 import (
+	"encoding/json"
 	"sync/atomic"
 	"sync"
 	"bufio"
 	"os"
 	"log"
+	"strconv"
 	"flag"
 	"fmt"
-	"strconv"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -21,6 +22,7 @@ type Publisher struct {
 	queueUrl string
 	filename string
 	reprocess []string
+	rawContent bool
 	totalMessages, totalSuccess,totalFailure count32
 	sync.Mutex
 }
@@ -40,6 +42,7 @@ func NewPublisher() *Publisher {
 
 	filename := flag.String("file", "", "filename to process")
 	queue := flag.String("queue", "", "Queue that will receive the messages")	
+	rawContent := flag.Bool("raw-content", false, "Messages should be interpreted as raw")	
 	
 	validate()
 	
@@ -48,7 +51,7 @@ func NewPublisher() *Publisher {
 	if err!=nil{
 		panic(err)
 	}
-	return &Publisher{client: sqs.New(session),queueUrl:*queue,filename:*filename}
+	return &Publisher{client: sqs.New(session),queueUrl:*queue,filename:*filename,rawContent:*rawContent}
 }
 
 // validate args to make sure all required parameters are present.
@@ -129,7 +132,7 @@ func (s *Publisher) Run()error{
 		log.Printf("The following %d message(s) could not be sent: %+v\n",len(s.reprocess),s.reprocess)
 	}
 
-	log.Printf("TOTAL MESSAGES: %d\nTOTAL SUCCESS: %d\nTOTAL FAILURE: %d",s.totalMessages,s.totalSuccess,s.totalFailure)
+	log.Printf("TOTAL MESSAGES: %d\nTOTAL SUCCESS: %d\nTOTAL FAILURE: %d\n",s.totalMessages,s.totalSuccess,s.totalFailure)
 
 	return nil
 }
@@ -153,19 +156,15 @@ func chunkMessages(chunkSize int,messages []string)[][]string{
 func (s *Publisher) SendMessages(messages []string,wg *sync.WaitGroup,reprocess bool)(*sqs.SendMessageBatchOutput,error){
 
 	defer wg.Done()
-	entries := []*sqs.SendMessageBatchRequestEntry{}
-	for k,v:=range messages{
-		entries = append(entries,&sqs.SendMessageBatchRequestEntry{
-			MessageBody: aws.String(v),
-			Id: aws.String(strconv.Itoa(k)),
-		})
-	}
+	entries := s.getEntries(messages)
+	
 	output,err := s.client.SendMessageBatch(&sqs.SendMessageBatchInput{
 		QueueUrl:aws.String(s.queueUrl),
 		Entries : entries,
 	})
 	
 	if err!=nil{
+		fmt.Println(err)
 		s.Lock()
 		s.reprocess = append(s.reprocess,messages...)
 		s.Unlock()
@@ -179,3 +178,32 @@ func (s *Publisher) SendMessages(messages []string,wg *sync.WaitGroup,reprocess 
 
 	return output,nil
 }	
+
+
+func (s *Publisher) getEntries(messages []string)[]*sqs.SendMessageBatchRequestEntry{
+	
+	entries := []*sqs.SendMessageBatchRequestEntry{}
+	
+	if !s.rawContent{
+		fmt.Println("is here!")
+		for _,v:=range messages{
+			entry := sqs.SendMessageBatchRequestEntry{}
+
+			err := json.Unmarshal([]byte(v),&entry)
+			if err!=nil{
+				fmt.Println(err)
+				panic(err)
+			}
+			entries = append(entries,&entry)
+		}
+		return entries
+	}
+	
+	for k,v:=range messages{
+		entries = append(entries,&sqs.SendMessageBatchRequestEntry{
+			MessageBody: aws.String(v),
+			Id: aws.String(strconv.Itoa(k)),
+		})
+	}
+	return entries
+}

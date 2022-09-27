@@ -89,6 +89,7 @@ func (s *Publisher) Run()error{
 
 	scanner := bufio.NewScanner(file)
 
+	//Scans the file, sending messages in batches of 10
 	chunk := []string{}
 	wg := sync.WaitGroup{}
 	for {	
@@ -112,22 +113,23 @@ func (s *Publisher) Run()error{
 		}
 		break
 	}
+
 	wg.Wait()
 
+	//Verify if there are any messages to reprocess.
 	if len(s.reprocess)>0{
 		dataReprocess := s.reprocess
 		s.reprocess = []string{}
 		log.Printf("%d message(s) will be reprocessed:\n",len(dataReprocess))
-		to := 0
 		for _,v := range chunkMessages(10,dataReprocess){
-			to += len(v)
 			wg.Add(1)
 			go s.SendMessages(v,&wg,true)
 		}
-
 	}
+
 	wg.Wait()
 
+	//Print Results
 	if len(s.reprocess)>0{
 		log.Printf("The following %d message(s) could not be sent: %+v\n",len(s.reprocess),s.reprocess)
 	}
@@ -164,7 +166,7 @@ func (s *Publisher) SendMessages(messages []string,wg *sync.WaitGroup,reprocess 
 	})
 	
 	if err!=nil{
-		fmt.Println(err)
+		log.Println(err)
 		s.Lock()
 		s.reprocess = append(s.reprocess,messages...)
 		s.Unlock()
@@ -185,7 +187,6 @@ func (s *Publisher) getEntries(messages []string)[]*sqs.SendMessageBatchRequestE
 	entries := []*sqs.SendMessageBatchRequestEntry{}
 	
 	if !s.rawContent{
-		fmt.Println("is here!")
 		for _,v:=range messages{
 			entry := sqs.SendMessageBatchRequestEntry{}
 

@@ -8,7 +8,7 @@ Each message within the file must be separated by line breaks.
 AWS credentials properly configured and with permission to send messages to the specified queue.
 
 ### Installation:
-```go install github.com/acassio/go-file-to-sqs/go-filetosqs@latest```
+```go install github.com/acassio/go-tools/filetosqs@latest```
 
 ### Usage:
 ```go-filetosqs -file my-text-file.txt -queue my-sqs-queue-url```

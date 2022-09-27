@@ -7,7 +7,7 @@ It`s a Simple command line to consume messages from an SQS queue and save them t
 AWS credentials properly configured and with permission to receive messages to the specified queue.
 
 ### Installation:
-```go build -o $GOPATH/bin/go-sqstofile github.com/acassio/go-sqs-to-file/cmd```
+```go install github.com/acassio/go-tools/sqstofile@latest```
 
 ### Usage:
 ```go-sqstofile -file my-text-file.txt -queue my-sqs-queue-url```

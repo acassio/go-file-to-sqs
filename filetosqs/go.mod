@@ -1,4 +1,4 @@
-module github.comm/acassio/go-tools/filetosqs
+module github.com/acassio/go-tools/filetosqs
 
 go 1.18
 

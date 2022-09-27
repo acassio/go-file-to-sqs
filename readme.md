@@ -12,3 +12,9 @@ AWS credentials properly configured and with permission to send messages to the 
 
 ### Usage:
 ```go-sqs-publisher -file my-text-file.txt -queue my-sqs-queue-url```
+
+|parameter|type|required|default|description
+|---------|----|--------|-------------|----------
+|file|string|yes||file that contains the messages. |
+|queue|string|yes||URL of the queue to which messages will be sent.  |
+|raw-content|boolean|no|false|Describe whether messages within the file should be read as raw content as opposed to format: {"Id":"...","MessageBody":"{...}"}.|

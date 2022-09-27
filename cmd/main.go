@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 	"log"
-	"github.com/acassio/go-sqs-publisher/publisher"
+	"github.com/acassio/go-file-to-sqs/publisher"
 )
 
 func main()  {

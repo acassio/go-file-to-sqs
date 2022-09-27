@@ -1,4 +1,4 @@
-## Go SQS Publisher 
+## Go File to SQS
 
 It`s a simple command line to automate the process of sending batch messages from a file to an SQS queue.
 Each message within the file must be separated by line breaks.
@@ -8,10 +8,10 @@ Each message within the file must be separated by line breaks.
 AWS credentials properly configured and with permission to send messages to the specified queue.
 
 ### Installation:
-```go build -o $GOPATH/bin/go-sqs-publisher github.com/acassio/go-sqs-publisher/cmd```
+```go build -o $GOPATH/bin/go-filetosqs github.com/acassio/go-file-to-sqs/cmd```
 
 ### Usage:
-```go-sqs-publisher -file my-text-file.txt -queue my-sqs-queue-url```
+```go-filetosqs -file my-text-file.txt -queue my-sqs-queue-url```
 
 |parameter|type|required|default|description
 |---------|----|--------|-------------|----------

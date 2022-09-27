@@ -1,4 +1,4 @@
-module github.com/acassio/go-sqs-publisher
+module github.com/acassio/go-file-to-sqs
 
 go 1.18
 
